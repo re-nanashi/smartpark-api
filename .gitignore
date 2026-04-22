@@ -1,0 +1,37 @@
+# --- Build Artifacts ---
+target/
+build/
+out/
+*.jar
+*.war
+*.zip
+*.tar.gz
+
+# --- IDE Settings ---
+.idea/
+*.iml
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.vim
+
+# --- System & Log Files ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+logs/
+
+# --- Environment & Secrets ---
+.env
+.env.local
+application-*.properties
+application-*.yml
+!application.properties
+!application.yml
+
+# --- MISC ---
+HELP.md
