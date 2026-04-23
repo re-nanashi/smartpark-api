@@ -1,0 +1,23 @@
+package com.smartpark.api.shared.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum ErrorCode {
+    // Core
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"),
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED"),
+    BUSINESS_ERROR("BUSINESS_ERROR"),
+    RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND"),
+    RESOURCE_CONFLICT("RESOURCE_CONFLICT"),
+    VALIDATION_FAILED("VALIDATION_FAILED"),
+    INVALID_INPUT("INVALID_INPUT"),
+
+    // Vehicle
+    VEHICLE_NOT_FOUND("VEHICLE_NOT_FOUND"),
+    VEHICLE_ALREADY_EXISTS("VEHICLE_ALREADY_EXISTS");
+
+    private final String value;
+}
