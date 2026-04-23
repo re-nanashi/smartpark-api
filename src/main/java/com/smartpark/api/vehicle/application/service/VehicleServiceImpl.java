@@ -42,7 +42,6 @@ public class VehicleServiceImpl implements VehicleService{
         log.info("Registered vehicle '{}' ({}) owned by '{}'",
                 saved.getLicensePlate(), saved.getVehicleType(), saved.getOwnerName());
 
-
         return toResponse(saved);
     }
 
