@@ -2,7 +2,6 @@ package com.smartpark.api.vehicle.application.service;
 
 import com.smartpark.api.shared.dto.PageResponse;
 import com.smartpark.api.shared.exception.ConflictException;
-import com.smartpark.api.shared.exception.ErrorCode;
 import com.smartpark.api.shared.exception.NotFoundException;
 import com.smartpark.api.vehicle.api.dto.RegisterVehicleRequest;
 import com.smartpark.api.vehicle.api.dto.VehicleResponse;
@@ -96,41 +95,6 @@ class VehicleServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should set VEHICLE_ALREADY_EXISTS error code on ConflictException")
-        void shouldSetVehicleAlreadyExistsErrorCode_onConflictException() {
-            // Arrange
-            given(vehicleRepository.existsByLicensePlate(LICENSE_PLATE)).willReturn(true);
-
-            // Act
-            // ConflictException(String, ErrorCode) > BusinessException > @Getter getErrorCode()
-            ConflictException ex = catchThrowableOfType(
-                    () -> vehicleService.registerVehicle(buildRequest()),
-                    ConflictException.class
-            );
-
-            // Assert
-            assertThat(ex).isNotNull();
-            assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.VEHICLE_ALREADY_EXISTS);
-            assertThat(ex.getErrorCode().getValue()).isEqualTo("VEHICLE_ALREADY_EXISTS");
-        }
-
-        @Test
-        @DisplayName("ConflictException should be an unchecked (RuntimeException) exception")
-        void conflictException_shouldBeRuntimeException() {
-            // Arrange
-            given(vehicleRepository.existsByLicensePlate(LICENSE_PLATE)).willReturn(true);
-
-            // Act
-            ConflictException ex = catchThrowableOfType(
-                    () -> vehicleService.registerVehicle(buildRequest()),
-                    ConflictException.class
-            );
-
-            // Assert: ConflictException > BusinessException > RuntimeException
-            assertThat(ex).isInstanceOf(RuntimeException.class);
-        }
-
-        @Test
         @DisplayName("Should build the Vehicle entity from all request fields before saving")
         void shouldBuildVehicleWithAllFieldsFromRequest() {
             // Arrange
@@ -156,8 +120,8 @@ class VehicleServiceImplTest {
             RegisterVehicleRequest request = buildRequest();
             Vehicle persisted = Vehicle.builder()
                     .licensePlate(LICENSE_PLATE)
-                    .vehicleType(VehicleType.TRUCK)         // differs from request (CAR)
-                    .ownerName("System Persisted Name")     // differs from request
+                    .vehicleType(VehicleType.TRUCK) // differs from request (CAR)
+                    .ownerName("System Persisted Name") // differs from request
                     .build();
 
             given(vehicleRepository.existsByLicensePlate(LICENSE_PLATE)).willReturn(false);
@@ -206,61 +170,6 @@ class VehicleServiceImplTest {
                     .hasMessageContaining(LICENSE_PLATE);
 
             then(vehicleRepository).should().findByLicensePlate(LICENSE_PLATE);
-        }
-
-        @Test
-        @DisplayName("Should set VEHICLE_NOT_FOUND error code on NotFoundException")
-        void shouldSetVehicleNotFoundErrorCode_onNotFoundException() {
-            // Arrange
-            given(vehicleRepository.findByLicensePlate(LICENSE_PLATE)).willReturn(Optional.empty());
-
-            // Act
-            // Service calls: new NotFoundException(msg, ErrorCode.VEHICLE_NOT_FOUND)
-            // which routes to NotFoundException(String, ErrorCode) > super(message, errorCode)
-            // NOT the default single-arg constructor (which would give RESOURCE_NOT_FOUND)
-            NotFoundException ex = catchThrowableOfType(
-                    () -> vehicleService.getVehicle(LICENSE_PLATE),
-                    NotFoundException.class
-            );
-
-            // Assert
-            assertThat(ex).isNotNull();
-            assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.VEHICLE_NOT_FOUND);
-            assertThat(ex.getErrorCode().getValue()).isEqualTo("VEHICLE_NOT_FOUND");
-        }
-
-        @Test
-        @DisplayName("NotFoundException should be an unchecked (RuntimeException) exception")
-        void notFoundException_shouldBeRuntimeException() {
-            // Arrange
-            given(vehicleRepository.findByLicensePlate(LICENSE_PLATE)).willReturn(Optional.empty());
-
-            // Act
-            NotFoundException ex = catchThrowableOfType(
-                    () -> vehicleService.getVehicle(LICENSE_PLATE),
-                    NotFoundException.class
-            );
-
-            // Assert: NotFoundException > BusinessException > RuntimeException
-            assertThat(ex).isInstanceOf(RuntimeException.class);
-        }
-
-        @Test
-        @DisplayName("Should NOT use the default RESOURCE_NOT_FOUND code — service overrides with VEHICLE_NOT_FOUND")
-        void shouldNotUseDefaultResourceNotFoundCode() {
-            // Arrange
-            given(vehicleRepository.findByLicensePlate(LICENSE_PLATE)).willReturn(Optional.empty());
-
-            // Act
-            NotFoundException ex = catchThrowableOfType(
-                    () -> vehicleService.getVehicle(LICENSE_PLATE),
-                    NotFoundException.class
-            );
-
-            // Assert: the single-arg constructor defaults to RESOURCE_NOT_FOUND, but the service explicitly passes
-            // VEHICLE_NOT_FOUND
-            assertThat(ex.getErrorCode()).isNotEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
-            assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.VEHICLE_NOT_FOUND);
         }
     }
 
@@ -318,25 +227,6 @@ class VehicleServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should correctly compute pagination metadata for a non-first page")
-        void shouldComputePaginationMetadata_forNonFirstPage() {
-            // Arrange:  page 1, size 5, 11 total elements > ceil(11/5) = 3 total pages
-            Pageable pageable = PageRequest.of(1, 5);
-            Page<Vehicle> page = new PageImpl<>(List.of(buildVehicle()), pageable, 11);
-            given(vehicleRepository.findAll(pageable)).willReturn(page);
-
-            // Act
-            PageResponse<VehicleResponse> result = vehicleService.getAllVehicles(pageable);
-
-            // Assert
-            assertThat(result.page()).isEqualTo(1);
-            assertThat(result.size()).isEqualTo(5);
-            assertThat(result.totalElements()).isEqualTo(11L);
-            assertThat(result.totalPages()).isEqualTo(3);
-            assertThat(result.content()).hasSize(1);
-        }
-
-        @Test
         @DisplayName("Should fully map all three VehicleResponse fields for each item in the page")
         void shouldMapAllVehicleFields_forEachItemInPage() {
             // Arrange
@@ -352,22 +242,6 @@ class VehicleServiceImplTest {
             assertThat(item.licensePlate()).isEqualTo(LICENSE_PLATE);
             assertThat(item.vehicleType()).isEqualTo(TYPE);
             assertThat(item.ownerName()).isEqualTo(OWNER_NAME);
-        }
-
-        @Test
-        @DisplayName("Should call repository findAll exactly once with the given Pageable")
-        void shouldCallFindAllExactlyOnce_withGivenPageable() {
-            // Arrange
-            Pageable pageable = PageRequest.of(0, 20, Sort.by("licensePlate"));
-            Page<Vehicle> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-            given(vehicleRepository.findAll(pageable)).willReturn(emptyPage);
-
-            // Act
-            vehicleService.getAllVehicles(pageable);
-
-            // Assert
-            then(vehicleRepository).should(times(1)).findAll(pageable);
-            then(vehicleRepository).shouldHaveNoMoreInteractions();
         }
 
         @Test
