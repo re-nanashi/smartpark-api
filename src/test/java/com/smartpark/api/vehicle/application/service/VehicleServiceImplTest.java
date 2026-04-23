@@ -28,7 +28,6 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("VehicleServiceImpl Tests")
 class VehicleServiceImplTest {
-
     @Mock
     private VehicleRepository vehicleRepository;
 
@@ -38,8 +37,8 @@ class VehicleServiceImplTest {
     // Matches pattern ^[A-Za-z0-9\-]+$ and within size constraints (min=8, max=20)
     private static final String LICENSE_PLATE = "ABC-12345";
     // Matches pattern ^[A-Za-z ]+$ and within size constraints (min=3, max=100)
-    private static final String OWNER_NAME    = "Juan dela Cruz";
-    private static final VehicleType TYPE     = VehicleType.CAR;
+    private static final String OWNER_NAME = "Juan dela Cruz";
+    private static final VehicleType TYPE = VehicleType.CAR;
 
     private RegisterVehicleRequest buildRequest() {
         return new RegisterVehicleRequest(LICENSE_PLATE, TYPE, OWNER_NAME);
@@ -176,7 +175,6 @@ class VehicleServiceImplTest {
     @Nested
     @DisplayName("getVehicle()")
     class GetVehicle {
-
         @Test
         @DisplayName("Should return a VehicleResponse when the license plate exists")
         void shouldReturnVehicleResponse_whenFound() {
@@ -269,7 +267,6 @@ class VehicleServiceImplTest {
     @Nested
     @DisplayName("getAllVehicles()")
     class GetAllVehicles {
-
         @Test
         @DisplayName("Should return a PageResponse with correctly mapped VehicleResponses")
         void shouldReturnPageResponse_withMappedContent() {
