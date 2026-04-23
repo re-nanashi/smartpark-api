@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,16 +42,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(error.status()).body(error);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFoundException(NotFoundException ex, WebRequest request) {
+    @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})
+    public ResponseEntity<ApiError> handleNotFoundException(Exception ex, WebRequest request) {
+        ErrorCode code = ex instanceof ConflictException conflict
+                ? conflict.getErrorCode()
+                : ErrorCode.RESOURCE_NOT_FOUND;
+
         ApiError error = errorFactory.build(
                 request,
                 HttpStatus.NOT_FOUND,
-                ex.getErrorCode().getValue(),
+                code.getValue(),
                 ex.getMessage()
         );
 
-        log.warn("{} message={}", ex.getErrorCode(), ex.getMessage());
+        log.warn("{} message={}", code, ex.getMessage());
 
         return ResponseEntity.status(error.status()).body(error);
     }
