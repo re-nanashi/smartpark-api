@@ -18,6 +18,6 @@ public record RegisterVehicleRequest(
         @NotBlank(message = "Owner name must not be blank")
         @Pattern(regexp = "^[A-Za-z ]+$",
                 message = "Owner name may only contain letters and spaces")
-        @Size(min = 2, max = 20, message = "Owner name must be between 2 and 100 characters")
+        @Size(min = 3, max = 100, message = "Owner name must be between 3 and 100 characters")
         String ownerName
 ) {}

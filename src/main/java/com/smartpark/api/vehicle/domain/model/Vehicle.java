@@ -21,7 +21,6 @@ public class Vehicle extends BaseEntity {
     @Column(name = "vehicle_type", nullable = false)
     private VehicleType vehicleType;
 
-    // TODO: DTO should enforce max and min
     @Column(name = "owner_name", length = 100, nullable = false)
     private String ownerName;
 }
