@@ -110,7 +110,7 @@ Run requests in this order: Register Lot > Register Vehicle > Check In > Check O
 ```bash
 curl -s -X POST http://localhost:8080/api/v1/lots \
   -H "Content-Type: application/json" \
-  -d '{"id":"LOT-MALL-01","location":"SM Megamall, Mandaluyong","capacity":200}'
+  -d '{"lotId":"LOT-MALL-01","location":"SM Megamall, Mandaluyong","capacity":200}'
 ```
 
 #### Register a vehicle
@@ -144,6 +144,26 @@ curl -s http://localhost:8080/api/v1/lots/LOT-AYALA-01/occupancy
 curl -s http://localhost:8080/api/v1/lots/LOT-AYALA-01/vehicles
 ```
 
+### Option C: Test the Fallback Chain Manually
+#### Stop Redis
+```bash
+# Stop Redis to force DB lock fallback
+docker stop smartpark-redis
+
+# Check in still works via DB lock
+curl -s -X POST http://localhost:8080/api/v1/sessions/check-in \
+  -H "Content-Type: application/json" \
+  -d '{"lotId":"LOT-AYALA-01","licensePlate":"AAA-1234"}'
+
+# Bring Redis back
+docker start smartpark-redis
+```
+
+Watch the app logs and you'll see the fallback warnings:
+```
+WARN  Redis UNAVAILABLE for lot 'LOT-AYALA-01' – falling back to DB lock
+```
+
 ---
 
 ## Pre-seeded Data
@@ -172,3 +192,14 @@ The application loads the following data on startup (`DataSeeder.java`):
 | `HHH-5566` | TRUCK | Luis Torres |
 | `III-7788` | CAR | Elena Ramos |
 | `JJJ-9900` | MOTORCYCLE | Miguel Cruz |
+
+## Quick Reference
+
+| Command | Purpose |
+|---|---|
+| `mvn clean package -DskipTests` | Build JAR |
+| `mvn spring-boot:run` | Run app |
+| `mvn test` | Run unit tests |
+| `docker run -d --name smartpark-redis -p 6379:6379 redis:7-alpine` | Start Redis |
+| `docker stop smartpark-redis` | Stop Redis (triggers DB lock fallback) |
+| `http://localhost:8080/h2-console` | View database in browser |
