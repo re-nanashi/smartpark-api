@@ -1,16 +1,17 @@
 # SmartPark API
 
-Intelligent parking management system for Manila-scale urban areas. Built with Spring Boot 3, Redisson (Redis), and H2 (portable to PostgreSQL).
+Intelligent parking management system for urban areas. Built with Spring Boot 3, Redisson (Redis), and H2 (portable to PostgreSQL).
 
 ---
 
-## Prerequisites (TODO)
+## Prerequisites
 
-| Tool | Version                                                      |
-|------|--------------------------------------------------------------|
-| Java | 21+                                                          |
-| Maven | 3.8+                                                         |
-| Redis | 7+ *(optional – app falls back to DB lock when unavailable)* |
+| Tool              | Version                                                                               |
+|-------------------|---------------------------------------------------------------------------------------|
+| Java              | 21+                                                                                   |
+| Spring Boot       | 3.5+                                                                                  |
+| Redis             | 7.x (Docker redis:7-alpine) *(optional – app falls back to DB lock when unavailable)* |
+| Redisson (client) | 3.52.0                                                                                |
 
 ---
 
