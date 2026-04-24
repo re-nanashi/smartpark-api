@@ -1,8 +1,8 @@
 package com.smartpark.api.parking.application.service;
 
-import com.smartpark.api.parking.api.dto.OccupancyResponse;
-import com.smartpark.api.parking.api.dto.ParkingLotResponse;
-import com.smartpark.api.parking.api.dto.RegisterParkingLotRequest;
+import com.smartpark.api.parking.api.dto.response.OccupancyResponse;
+import com.smartpark.api.parking.api.dto.response.ParkingLotResponse;
+import com.smartpark.api.parking.api.dto.request.RegisterParkingLotRequest;
 import com.smartpark.api.parking.domain.model.ParkingLot;
 import com.smartpark.api.parking.domain.repository.ParkingLotRepository;
 import com.smartpark.api.shared.exception.ConflictException;

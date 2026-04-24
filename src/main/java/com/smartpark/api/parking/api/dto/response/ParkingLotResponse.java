@@ -1,4 +1,4 @@
-package com.smartpark.api.parking.api.dto;
+package com.smartpark.api.parking.api.dto.response;
 
 import lombok.Builder;
 

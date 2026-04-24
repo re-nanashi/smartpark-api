@@ -1,0 +1,719 @@
+{
+  "info": {
+    "_postman_id": "smartpark-collection-v2",
+    "name": "SmartPark API",
+    "description": "Intelligent Parking Management System for Manila-scale urban areas.\n\nHow to use:\n1. Import this collection into Postman\n2. Set the `baseUrl` collection variable to `http://localhost:8080`\n3. Run requests in this order: Register Lot → Register Vehicle → Check In → Get Occupancy → Get Parked Vehicles → Check Out\n\nPre-seeded lots: LOT-AYALA-01, LOT-SMNORTH-01, LOT-BGC-01, LOT-ROBINSONS-01, LOT-GREENBELT-01\nPre-seeded vehicles: AAA-1234, BBB-5678, CCC-9012, DDD-3456, EEE-7890, FFF-1122, GGG-3344, HHH-5566, III-7788, JJJ-9900",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Base URL of the SmartPark API"
+    }
+  ],
+  "item": [
+    {
+      "name": "Parking Lots",
+      "description": "Endpoints for registering lots and viewing occupancy.",
+      "item": [
+        {
+          "name": "Register Parking Lot – Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-MALL-01\",\n  \"location\": \"SM Megamall, Mandaluyong City\",\n  \"capacity\": 250\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Registers a new parking lot with a client-supplied ID.\n\nExpected response: 201 Created"
+          }
+        },
+        {
+          "name": "Register Parking Lot – Duplicate ID (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"location\": \"Duplicate Location\",\n  \"capacity\": 100\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Attempts to register a lot that already exists (pre-seeded).\n\nExpected response: 409 Conflict"
+          }
+        },
+        {
+          "name": "Register Parking Lot – Validation Error (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"\",\n  \"location\": \"\",\n  \"capacity\": -1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Sends blank ID, blank location, and negative capacity.\n\nExpected response: 400 Bad Request with field-level error details"
+          }
+        },
+        {
+          "name": "Get Occupancy – LOT-AYALA-01",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "occupancy"]
+            },
+            "description": "Returns current occupancy, available spaces, and occupancy percentage.\n\nExpected response: 200 OK"
+          }
+        },
+        {
+          "name": "Get Occupancy – LOT-SMNORTH-01",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-SMNORTH-01/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-SMNORTH-01", "occupancy"]
+            },
+            "description": "Expected response: 200 OK"
+          }
+        },
+        {
+          "name": "Get Occupancy – Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-NONEXISTENT/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-NONEXISTENT", "occupancy"]
+            },
+            "description": "Requests occupancy for a lot that does not exist.\n\nExpected response: 404 Not Found"
+          }
+        },
+        {
+          "name": "Get Parked Vehicles – LOT-AYALA-01",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "vehicles"]
+            },
+            "description": "Returns all vehicles with active sessions in this lot.\n\nExpected response: 200 OK — empty array [] if no one is checked in yet"
+          }
+        },
+        {
+          "name": "Get Parked Vehicles – Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-NONEXISTENT/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-NONEXISTENT", "vehicles"]
+            },
+            "description": "Expected response: 404 Not Found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "description": "Endpoints for registering vehicles.",
+      "item": [
+        {
+          "name": "Register Vehicle – CAR",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"ZZZ-0001\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"Jose Rizal\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Registers a new CAR.\n\nExpected response: 201 Created"
+          }
+        },
+        {
+          "name": "Register Vehicle – MOTORCYCLE",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"MTR-0001\",\n  \"vehicleType\": \"MOTORCYCLE\",\n  \"ownerName\": \"Andres Bonifacio\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Registers a new MOTORCYCLE.\n\nExpected response: 201 Created"
+          }
+        },
+        {
+          "name": "Register Vehicle – TRUCK",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"TRK-0001\",\n  \"vehicleType\": \"TRUCK\",\n  \"ownerName\": \"Emilio Aguinaldo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Registers a new TRUCK.\n\nExpected response: 201 Created"
+          }
+        },
+        {
+          "name": "Register Vehicle – Duplicate Plate (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"AAA-1234\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"Duplicate Owner\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Attempts to register a plate that already exists (pre-seeded).\n\nExpected response: 409 Conflict"
+          }
+        },
+        {
+          "name": "Register Vehicle – Invalid Plate Characters (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"ABC 123!\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"Test Owner\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "License plate contains a space and exclamation mark — only letters, numbers, and dashes are allowed.\n\nExpected response: 400 Bad Request"
+          }
+        },
+        {
+          "name": "Register Vehicle – Invalid Owner Name (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"VAL-0001\",\n  \"vehicleType\": \"CAR\",\n  \"ownerName\": \"John123!!!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Owner name contains numbers and special characters — only letters and spaces are allowed.\n\nExpected response: 400 Bad Request"
+          }
+        },
+        {
+          "name": "Register Vehicle – Invalid Vehicle Type (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "vehicles"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"VAL-0002\",\n  \"vehicleType\": \"BUS\",\n  \"ownerName\": \"Test Owner\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Vehicle type must be CAR, MOTORCYCLE, or TRUCK.\n\nExpected response: 400 Bad Request"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parking Sessions",
+      "description": "Check-in and check-out endpoints. These are the race-condition-sensitive endpoints protected by the three-tier lock chain.",
+      "item": [
+        {
+          "name": "Check In – AAA-1234 to LOT-AYALA-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"AAA-1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Checks in a pre-seeded vehicle (Juan dela Cruz's CAR) into a pre-seeded lot.\n\nExpected response: 200 OK with sessionId, checkInTime, and remainingSpaces"
+          }
+        },
+        {
+          "name": "Check In – BBB-5678 to LOT-AYALA-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"BBB-5678\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Checks in a second vehicle to the same lot.\n\nExpected response: 200 OK"
+          }
+        },
+        {
+          "name": "Check In – CCC-9012 to LOT-SMNORTH-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-SMNORTH-01\",\n  \"licensePlate\": \"CCC-9012\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Checks in a MOTORCYCLE to a different lot.\n\nExpected response: 200 OK"
+          }
+        },
+        {
+          "name": "Check In – Already Parked (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-BGC-01\",\n  \"licensePlate\": \"AAA-1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "AAA-1234 is already parked in LOT-AYALA-01. A vehicle can only be in one lot at a time.\n\nRun 'Check In – AAA-1234 to LOT-AYALA-01' first.\n\nExpected response: 409 Conflict"
+          }
+        },
+        {
+          "name": "Check In – Vehicle Not Registered (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"XYZ-9999\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Plate XYZ-9999 has never been registered.\n\nExpected response: 404 Not Found"
+          }
+        },
+        {
+          "name": "Check In – Lot Not Found (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-NONEXISTENT\",\n  \"licensePlate\": \"AAA-1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Lot does not exist.\n\nExpected response: 404 Not Found"
+          }
+        },
+        {
+          "name": "Check In – Missing Fields (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"\",\n  \"licensePlate\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Both fields are blank.\n\nExpected response: 400 Bad Request with field-level error details"
+          }
+        },
+        {
+          "name": "Check Out – AAA-1234 from LOT-AYALA-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"AAA-1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Checks out AAA-1234 from LOT-AYALA-01.\n\nRun 'Check In – AAA-1234 to LOT-AYALA-01' first.\n\nExpected response: 200 OK with sessionId, checkInTime, checkOutTime, and availableSpaces"
+          }
+        },
+        {
+          "name": "Check Out – BBB-5678 from LOT-AYALA-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"BBB-5678\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Expected response: 200 OK"
+          }
+        },
+        {
+          "name": "Check Out – Vehicle Not Parked (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"EEE-7890\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "EEE-7890 has no active session in LOT-AYALA-01.\n\nExpected response: 409 Conflict"
+          }
+        },
+        {
+          "name": "Check Out – Wrong Lot (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-BGC-01\",\n  \"licensePlate\": \"CCC-9012\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "CCC-9012 is parked in LOT-SMNORTH-01, not LOT-BGC-01.\n\nRun 'Check In – CCC-9012 to LOT-SMNORTH-01' first.\n\nExpected response: 409 Conflict"
+          }
+        },
+        {
+          "name": "Check Out – Lot Not Found (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-NONEXISTENT\",\n  \"licensePlate\": \"AAA-1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Expected response: 404 Not Found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "End-to-End Flow",
+      "description": "Run these requests in order to walk through a complete happy-path scenario using pre-seeded data. No setup needed — just start the app and run from top to bottom.",
+      "item": [
+        {
+          "name": "1. Get Occupancy (before check-in)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "occupancy"]
+            },
+            "description": "Confirm the lot starts at 0 occupied spaces."
+          }
+        },
+        {
+          "name": "2. Check In – DDD-3456 (TRUCK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"DDD-3456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check in Jose Garcia's TRUCK. Note the sessionId in the response."
+          }
+        },
+        {
+          "name": "3. Check In – EEE-7890 (CAR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"EEE-7890\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check in Ana Villanueva's CAR."
+          }
+        },
+        {
+          "name": "4. Check In – FFF-1122 (MOTORCYCLE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"FFF-1122\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check in Carlo Bautista's MOTORCYCLE."
+          }
+        },
+        {
+          "name": "5. Get Parked Vehicles (should show 3)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "vehicles"]
+            },
+            "description": "Should return DDD-3456 (TRUCK), EEE-7890 (CAR), and FFF-1122 (MOTORCYCLE)."
+          }
+        },
+        {
+          "name": "6. Get Occupancy (should show 3 occupied)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "occupancy"]
+            },
+            "description": "occupiedSpaces=3, availableSpaces=497, occupancyPercentage=0.6"
+          }
+        },
+        {
+          "name": "7. Check Out – DDD-3456 (TRUCK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"DDD-3456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check out Jose Garcia's TRUCK. Response includes checkInTime and checkOutTime."
+          }
+        },
+        {
+          "name": "8. Check Out – EEE-7890 (CAR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"EEE-7890\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check out Ana Villanueva's CAR."
+          }
+        },
+        {
+          "name": "9. Check Out – FFF-1122 (MOTORCYCLE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sessions", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": \"LOT-AYALA-01\",\n  \"licensePlate\": \"FFF-1122\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Check out Carlo Bautista's MOTORCYCLE."
+          }
+        },
+        {
+          "name": "10. Get Occupancy (should be back to 0)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/lots/LOT-AYALA-01/occupancy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "lots", "LOT-AYALA-01", "occupancy"]
+            },
+            "description": "occupiedSpaces should be back to 0, availableSpaces=500."
+          }
+        }
+      ]
+    }
+  ]
+}

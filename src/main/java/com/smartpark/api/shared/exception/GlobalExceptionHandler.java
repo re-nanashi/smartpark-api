@@ -1,10 +1,12 @@
 package com.smartpark.api.shared.exception;
 
+import com.smartpark.api.parking.application.exception.TooManyRequestException;
 import com.smartpark.api.shared.dto.ApiError;
 import com.smartpark.api.shared.dto.ApiErrorFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,6 +20,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +164,24 @@ public class GlobalExceptionHandler {
                 .build();
 
         log.warn("{} message={}", ErrorCode.METHOD_NOT_ALLOWED, ex.getMessage());
+
+        return ResponseEntity.status(error.status()).body(error);
+    }
+
+    /**
+     * Terminal tier of the fallback chain: both Redis lock and DB pessimistic lock failed.
+     * Returns {@code Retry-After: 2} so clients know when to retry.
+     */
+    @ExceptionHandler(TooManyRequestException.class)
+    public ResponseEntity<ApiError> handleTooManyRequests(TooManyRequestException ex, WebRequest request) {
+        ApiError error = errorFactory.build(
+                request,
+                HttpStatus.TOO_MANY_REQUESTS,
+                ErrorCode.TOO_MANY_REQUESTS.getValue(),
+                "Too many requests. Please try again after some time."
+        );
+
+        log.warn("Returning 429 – both Redis and DB locks exhausted: {}", ex.getMessage());
 
         return ResponseEntity.status(error.status()).body(error);
     }
